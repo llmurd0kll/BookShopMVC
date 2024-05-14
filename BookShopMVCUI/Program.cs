@@ -1,4 +1,4 @@
-using BookShopMVCUI.Data;
+using BookShopMVCUI;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +16,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
     .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
 
+///Dependency injection functionality.
+builder.Services.AddTransient<IHomeRepository, HomeRepository>();
+
 var app = builder.Build();
 
+///Функционал, который создает админ юзера, если такого не имеется при запуске приложения.
 //using(var scope = app.Services.CreateScope())
 //{
 //    await DbSeeder.SeedDefaultData(scope.ServiceProvider);

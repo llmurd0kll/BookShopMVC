@@ -1,4 +1,5 @@
 using BookShopMVCUI.Models;
+using BookShopMVCUI.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -7,15 +8,28 @@ namespace BookShopMVCUI.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IHomeRepository _homeRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IHomeRepository homeRepository)
         {
             _logger = logger;
+            _homeRepository = homeRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string sterm ="", int genereId = 0)
         {
-            return View();
+            IEnumerable<Book> books = await _homeRepository.GetBooks(sterm, genereId);
+            IEnumerable<Genre> genres = await _homeRepository.Genres();
+
+            BookDisplayModel bookModel = new BookDisplayModel 
+            {
+                Books = books,
+                Genres = genres,
+                STerm = sterm,
+                GenreId = genereId
+            };
+
+            return View(bookModel);
         }
 
         public IActionResult Privacy()

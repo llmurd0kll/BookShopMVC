@@ -10,8 +10,8 @@ namespace BookShopMVCUI.Models
 
         [Required]
         [MaxLength(40)]
-        public string? BookName { get; set; }[Required]
-        
+        public string? BookName { get; set; }
+        [Required]
         [MaxLength(40)]
         public string? AuthorName { get; set; }
 
@@ -23,5 +23,8 @@ namespace BookShopMVCUI.Models
         public Genre Genre { get; set; }
         public List<OrderDetail> OrderDetail { get; set; }
         public List<CartDetail> CartDetail { get; set; }
+
+        [NotMapped]
+        public string GenreName { get; set; }
     }
 }
