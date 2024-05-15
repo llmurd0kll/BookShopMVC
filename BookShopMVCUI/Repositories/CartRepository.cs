@@ -15,18 +15,24 @@ namespace BookShopMVCUI.Repositories
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<bool> AddItem(int bookId, int quantity)
+        /// <summary>
+        /// Метод добавления предмета в корзину.
+        /// </summary>
+        /// <param name="bookId">Айди книги.</param>
+        /// <param name="quantity">Количество книг.</param>
+        /// <returns>Предметы в корзине.</returns>
+        public async Task<int> AddItem(int bookId, int quantity)
         {
-
+            string userId = GetUserId();
             using var transaction = _db.Database.BeginTransaction(); /// Начинаем транзакцию (как в БД) для того, чтобы откатить изменения сразу в 2 таблицах при ошибке.
             try
             {
                 /// Saving cart
-                string userId = GetUserId();
-
+                /// Если пользователь не авторизован, то ошибка.
                 if (string.IsNullOrEmpty(userId))
-                    return false;
+                    throw new Exception("Пользователь не авторизован!");
 
+                ///Если пользователь есть, то создаем корзину.
                 var cart = await GetCart(userId);
                 if (cart is null)
                 {
@@ -34,15 +40,19 @@ namespace BookShopMVCUI.Repositories
                     {
                         UserId = userId
                     };
+                    ///Добавляем предмет из корзины в БД.
                     _db.ShoppingCarts.Add(cart);
                 }
                 _db.SaveChanges();
                 /// cart detail section
-                var cartItem = _db.CartDetails.FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.BookId == bookId);
+                var cartItem = _db.CartDetails
+                                  .FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.BookId == bookId);
+                ///Если предмет есть в корзине, то увеличиваем значение
                 if (cartItem is not null)
                 {
                     cartItem.Quantity += quantity;
                 }
+                ///Если предмета нет, то создаем новую сущность типа cartItem и заносим в БД.
                 else
                 {
                     cartItem = new CartDetail
@@ -54,39 +64,35 @@ namespace BookShopMVCUI.Repositories
                     _db.CartDetails.Add(cartItem);
                 }
                 _db.SaveChanges();
+                ///Заканчиваем транзакцию.
                 transaction.Commit();
-                return true;
             }
             catch (Exception ex)
             {
-                return false;
             }
+            var cartItemCount = await GetCartItemCount(userId);
+            return cartItemCount;
         }
 
-        public async Task<bool> RemoveItem(int bookId)
+        public async Task<int> RemoveItem(int bookId)
         {
+            string userId = GetUserId();
 
-            //using var transaction = _db.Database.BeginTransaction(); /// Начинаем транзакцию (как в БД) для того, чтобы откатить изменения сразу в 2 таблицах при ошибке.
             try
             {
-                string userId = GetUserId();
-
-                if (string.IsNullOrEmpty(userId))
-                    return false;
+                if (string.IsNullOrEmpty(userId)) throw new Exception("User is not logged in");
 
                 var cart = await GetCart(userId);
-                if (cart is null)
-                {
-                    return false;
-                }
+
+                if (cart is null) 
+                    throw new Exception("Invalid cart");
                 _db.SaveChanges();
 
                 /// cart detail section
-                var cartItem = _db.CartDetails.FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.BookId == bookId);
-                if (cartItem is null)
-                {
-                    return false;
-                }
+                var cartItem = _db.CartDetails
+                                  .FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.BookId == bookId);
+                if (cartItem is null) 
+                    throw new Exception("Cart is empty");
                 else if (cartItem.Quantity == 1)
                 {
                     _db.CartDetails.Remove(cartItem);
@@ -96,16 +102,16 @@ namespace BookShopMVCUI.Repositories
                     cartItem.Quantity = cartItem.Quantity - 1;
                 }
                 _db.SaveChanges();
-                //transaction.Commit();
-                return true;
             }
             catch (Exception ex)
             {
-                return false;
             }
+            var cartItemCount = await GetCartItemCount(userId);
+
+            return cartItemCount;
         }
 
-        public async Task<IEnumerable<ShoppingCart>> GetUserCart()
+        public async Task<ShoppingCart> GetUserCart()
         {
             var userId = GetUserId();
             if (userId == null)
@@ -116,14 +122,33 @@ namespace BookShopMVCUI.Repositories
                  .Include(a => a.CartDetails)
                  .ThenInclude(a => a.Book)
                  .ThenInclude(a => a.Genre)
-                 .Where(a => a.UserId == userId).ToListAsync();
+                 .Where(a => a.UserId == userId).FirstOrDefaultAsync();
             return shoppingCart;
         }
 
-        private async Task<ShoppingCart> GetCart(string userId)
+        public async Task<ShoppingCart> GetCart(string userId)
         {
             var cart = await _db.ShoppingCarts.FirstOrDefaultAsync(x => x.UserId == userId);
             return cart;
+        }
+
+        /// <summary>
+        /// Кол-во доступных предметов в корзине.
+        /// </summary>
+        /// <param name="userId">Айди пользователя.</param>
+        /// <returns>Кол-во предметов в корзине.</returns>
+        public async Task<int> GetCartItemCount(string userId = "")
+        {
+            if (!string.IsNullOrEmpty(userId))
+            {
+                userId = GetUserId();
+            }
+            var data = await (from cart in _db.ShoppingCarts
+                              join cartDetail in _db.CartDetails
+                              on cart.Id equals cartDetail.ShoppingCartId
+                              select new { cartDetail.Id }
+                             ).ToListAsync();
+            return data.Count;
         }
 
         private string GetUserId()
