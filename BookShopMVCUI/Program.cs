@@ -18,6 +18,7 @@ builder.Services.AddControllersWithViews();
 
 ///Dependency injection functionality.
 builder.Services.AddTransient<IHomeRepository, HomeRepository>();
+builder.Services.AddTransient<ICartRepository, CartRepository>();
 
 var app = builder.Build();
 

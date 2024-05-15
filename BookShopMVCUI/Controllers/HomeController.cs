@@ -16,7 +16,7 @@ namespace BookShopMVCUI.Controllers
             _homeRepository = homeRepository;
         }
 
-        public async Task<IActionResult> Index(string sterm ="", int genereId = 0)
+        public async Task<IActionResult> Index(int genereId, string sterm ="")
         {
             IEnumerable<Book> books = await _homeRepository.GetBooks(sterm, genereId);
             IEnumerable<Genre> genres = await _homeRepository.Genres();
