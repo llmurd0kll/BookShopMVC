@@ -4,6 +4,7 @@ using BookShopMVCUI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookShopMVCUI.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240513124544_added-new-tables-to-database")]
+    partial class addednewtablestodatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,11 +32,6 @@ namespace BookShopMVCUI.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("BookName")
                         .IsRequired()
@@ -346,10 +344,12 @@ namespace BookShopMVCUI.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -386,10 +386,12 @@ namespace BookShopMVCUI.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -419,7 +421,7 @@ namespace BookShopMVCUI.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("BookShopMVCUI.Models.ShoppingCart", "ShoppingCart")
-                        .WithMany("CartDetails")
+                        .WithMany()
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -525,11 +527,6 @@ namespace BookShopMVCUI.Data.Migrations
             modelBuilder.Entity("BookShopMVCUI.Models.Order", b =>
                 {
                     b.Navigation("OrderDetail");
-                });
-
-            modelBuilder.Entity("BookShopMVCUI.Models.ShoppingCart", b =>
-                {
-                    b.Navigation("CartDetails");
                 });
 #pragma warning restore 612, 618
         }

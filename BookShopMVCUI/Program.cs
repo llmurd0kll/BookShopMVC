@@ -1,4 +1,4 @@
-using BookShopMVCUI.Data;
+using BookShopMVCUI;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +10,25 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultUI()
+    .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
 
+///Dependency injection functionality.
+builder.Services.AddTransient<IHomeRepository, HomeRepository>();
+builder.Services.AddTransient<ICartRepository, CartRepository>();
+builder.Services.AddTransient<IUserOrderRepository, UserOrderRepository>();
+
+
 var app = builder.Build();
+
+///Функционал, который создает админ юзера, если такого не имеется при запуске приложения.
+//using(var scope = app.Services.CreateScope())
+//{
+//    await DbSeeder.SeedDefaultData(scope.ServiceProvider);
+//}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
