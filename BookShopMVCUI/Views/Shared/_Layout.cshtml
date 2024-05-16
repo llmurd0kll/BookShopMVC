@@ -49,14 +49,7 @@
 <script>
     loadCartCount();
     async function loadCartCount(bookId) {
-        var usernameElement = document.getElementById("username");
-        if (usernameElement == null) {
-            window.location.href = "/Identity/Account/Login";
-            // var username = usernameElement.innerText;
-            // if(username.length < 1){
-            //     window.location.href = "/Identity/Account/Login";
-            // }
-        }
+        
         try {
             var response = await fetch(`/Cart/GetTotalItemInCart`)
             if (response.status == 200) {
