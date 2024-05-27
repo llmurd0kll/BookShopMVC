@@ -4,42 +4,41 @@
 
 
 <div style="width: 100%" class="mt-2">
-    <a href="/Identity/Account/Manage" class="btn btn-primary my-2">Back</a>
+    <a href="/Identity/Account/Manage" class="btn btn-primary my-2">Назад</a>
 
-    <h4>My Orders</h4>
+    <h4>Мои заказы</h4>
     @if (Model != null && Model.Count()>0)
     {
        <table class="table table-striped">
            <tr>
-               <th>OrderDate</th>
-               <th>OrderStatus</th>
+               <th>Дата заказа</th>
+               <th>Статус заказа</th>
            </tr>
             @foreach (var order in Model)
             {
                 <tr>
-                    <td>@order.CreateDate.ToString("dd-MM-yyyy")</td>
+                    <td>@order.CreateDate.ToString("dd.MM.yyyy")</td>
                     <td>@order.OrderStatus.StatusName</td>
                 </tr>
                 @if (order.OrderDetail != null && order.OrderDetail.Count > 0)
                 {
-                   
                 <tr>
                     <td>
                         <table class="table table-striped">
                                 <tr>
                                     <td>
-                                        Total:
+                                        Итого:
                                     </td>
                                     <td>
-                                        @(order.OrderDetail.Select(item => item.Book.Price * item.Quantity).Sum())
+                                        @(order.OrderDetail.Select(item => item.Book.Price * item.Quantity).Sum()) BYN
                                     </td>
                                 </tr>
                             <tr>
-                                <th>Book</th>
-                                <th>Image</th>
-                                <th>Genre</th>
-                                <th>Unit Price(INR)</th>
-                                <th>Total Price</th>
+                                <th>Книга</th>
+                                <th>Изображение</th>
+                                <th>Жанр</th>
+                                <th>Цена</th>
+                                <th>Итоговая цена</th>
                             </tr>
                             @foreach (var item in order.OrderDetail)
                             {
@@ -56,8 +55,8 @@
                                         }
                                     </td>
                                     <td>@item.Book.Genre.GenreName</td>
-                                    <td>@item.Book.Price X @item.Quantity</td>
-                                    <td>@(item.Book.Price * item.Quantity)</td>
+                                    <td>@item.Book.Price x @item.Quantity шт.</td>
+                                    <td>@(item.Book.Price * item.Quantity) BYN</td>
                                 </tr>
                             }
                         </table>
@@ -71,6 +70,6 @@
     }
     else
     {
-        <h5>No Orders</h5>
+        <h5>Нет заказов</h5>
     }
 </div>
